@@ -26,11 +26,11 @@ const MODULE_LABELS = {
 };
 
 const MODULE_URLS = {
-  'module-01-seeing-failures':  'https://github.com/andredavisme/RFQ-solutions/tree/main/course/module-01-seeing-failures',
-  'module-02-intake':           'https://github.com/andredavisme/RFQ-solutions/tree/main/course/module-02-intake',
-  'module-03-communication':    'https://github.com/andredavisme/RFQ-solutions/tree/main/course/module-03-communication',
-  'module-04-vendor-flows':     'https://github.com/andredavisme/RFQ-solutions/tree/main/course/module-04-vendor-flows',
-  'module-05-governance':       'https://github.com/andredavisme/RFQ-solutions/tree/main/course/module-05-governance',
+  'module-01-seeing-failures':  'https://github.com/andredavisme/RFQ-solutions/tree/main/course/modules/module-01-seeing-failures',
+  'module-02-intake':           'https://github.com/andredavisme/RFQ-solutions/tree/main/course/modules/module-02-intake',
+  'module-03-communication':    'https://github.com/andredavisme/RFQ-solutions/tree/main/course/modules/module-03-communication',
+  'module-04-vendor-flows':     'https://github.com/andredavisme/RFQ-solutions/tree/main/course/modules/module-04-vendor-flows',
+  'module-05-governance':       'https://github.com/andredavisme/RFQ-solutions/tree/main/course/modules/module-05-governance',
 };
 
 function moduleLink(slug) {
