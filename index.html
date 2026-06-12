@@ -35,7 +35,7 @@
     </div>
 
     <nav class="sidebar-nav">
-      <div class="sidebar-section-label">Learn</div>
+      <div class="sidebar-section-label">Course</div>
 
       <button class="sidebar-item" data-route="dashboard">
         <svg class="item-icon" viewBox="0 0 16 16" fill="none" stroke="currentColor" stroke-width="1.5" aria-hidden="true">
@@ -51,7 +51,7 @@
           <path d="M8 1.5 C5 4 5 12 8 14.5 C11 12 11 4 8 1.5Z"/>
           <path d="M1.5 8 h13"/>
         </svg>
-        Domains
+        Modules
         <span class="sidebar-badge" id="badge-domains">—</span>
       </button>
 
@@ -63,14 +63,6 @@
         Concepts
       </button>
 
-      <button class="sidebar-item" data-route="technologies">
-        <svg class="item-icon" viewBox="0 0 16 16" fill="none" stroke="currentColor" stroke-width="1.5" aria-hidden="true">
-          <rect x="2" y="3" width="12" height="10" rx="1.5"/>
-          <path d="M5 7 L7 9 L11 5"/>
-        </svg>
-        Technologies
-      </button>
-
       <button class="sidebar-item" data-route="glossary">
         <svg class="item-icon" viewBox="0 0 16 16" fill="none" stroke="currentColor" stroke-width="1.5" aria-hidden="true">
           <path d="M3 2 h10 a1 1 0 0 1 1 1 v10 a1 1 0 0 1 -1 1 h-10 a1 1 0 0 1 -1 -1 v-10 a1 1 0 0 1 1 -1z"/>
@@ -79,14 +71,14 @@
         Glossary
       </button>
 
-      <div class="sidebar-section-label">Examples</div>
+      <div class="sidebar-section-label">Reference</div>
 
       <button class="sidebar-item" data-route="examples">
         <svg class="item-icon" viewBox="0 0 16 16" fill="none" stroke="currentColor" stroke-width="1.5" aria-hidden="true">
           <path d="M4 5 L7 8 L4 11 M9 11 h3"/>
           <rect x="1.5" y="1.5" width="13" height="13" rx="2"/>
         </svg>
-        Code Examples
+        Walkthroughs
       </button>
 
       <button class="sidebar-item" data-route="sources">
@@ -94,7 +86,7 @@
           <path d="M3 3 h5 l2 2 h3 v9 h-10 z"/>
           <path d="M5 9 h6 M5 11 h4"/>
         </svg>
-        Sources
+        Source Modules
       </button>
     </nav>
 
@@ -130,27 +122,24 @@
     <section class="view" id="view-dashboard" aria-labelledby="dash-title">
       <header class="page-header">
         <div class="page-header-text">
-          <div class="page-overline">Mission Control</div>
-          <h1 class="page-title" id="dash-title">Course Dashboard</h1>
-          <p class="page-subtitle">Live overview of your Supabase-backed RFQ course content.</p>
-        </div>
-        <div class="page-actions">
-          <button class="btn btn-primary" data-route-to="concepts">+ New Concept</button>
+          <div class="page-overline">RFQ Communication Essentials</div>
+          <h1 class="page-title" id="dash-title">Course Overview</h1>
+          <p class="page-subtitle">Five modules. Seven failure categories. One operational framework.</p>
         </div>
       </header>
       <div class="section">
         <div class="stat-row">
-          <div class="stat-card"><div class="stat-label">Domains</div><div class="stat-value" data-stat="domains">—</div><div class="stat-meta">Knowledge domains</div><div class="stat-bar"><div class="stat-bar-fill" style="width:100%"></div></div></div>
-          <div class="stat-card"><div class="stat-label">Concepts</div><div class="stat-value" data-stat="concepts">—</div><div class="stat-meta">Published + draft</div><div class="stat-bar"><div class="stat-bar-fill" style="width:0%"></div></div></div>
-          <div class="stat-card"><div class="stat-label">Technologies</div><div class="stat-value" data-stat="technologies">—</div><div class="stat-meta">Active references</div><div class="stat-bar"><div class="stat-bar-fill" style="width:0%"></div></div></div>
-          <div class="stat-card"><div class="stat-label">Glossary</div><div class="stat-value" data-stat="glossary">—</div><div class="stat-meta">Published terms</div><div class="stat-bar"><div class="stat-bar-fill" style="width:0%"></div></div></div>
-          <div class="stat-card"><div class="stat-label">Examples</div><div class="stat-value" data-stat="examples">—</div><div class="stat-meta">Code examples</div><div class="stat-bar"><div class="stat-bar-fill" style="width:0%"></div></div></div>
+          <div class="stat-card"><div class="stat-label">Modules</div><div class="stat-value" data-stat="domains">—</div><div class="stat-meta">Course modules</div><div class="stat-bar"><div class="stat-bar-fill" style="width:100%"></div></div></div>
+          <div class="stat-card"><div class="stat-label">Concepts</div><div class="stat-value" data-stat="concepts">—</div><div class="stat-meta">Core principles</div><div class="stat-bar"><div class="stat-bar-fill" style="width:0%"></div></div></div>
+          <div class="stat-card"><div class="stat-label">Glossary</div><div class="stat-value" data-stat="glossary">—</div><div class="stat-meta">Defined terms</div><div class="stat-bar"><div class="stat-bar-fill" style="width:0%"></div></div></div>
+          <div class="stat-card"><div class="stat-label">Walkthroughs</div><div class="stat-value" data-stat="examples">—</div><div class="stat-meta">RFQ stage examples</div><div class="stat-bar"><div class="stat-bar-fill" style="width:0%"></div></div></div>
+          <div class="stat-card"><div class="stat-label">Source Modules</div><div class="stat-value" data-stat="sources">—</div><div class="stat-meta">Reference material</div><div class="stat-bar"><div class="stat-bar-fill" style="width:0%"></div></div></div>
         </div>
       </div>
       <div class="section">
         <div class="data-table-wrap">
           <div class="data-table-header">
-            <span class="data-table-title">Recent Concepts</span>
+            <span class="data-table-title">Core Concepts</span>
           </div>
           <table aria-label="Recent concepts">
             <thead><tr>
@@ -168,19 +157,18 @@
       </div>
     </section>
 
-    <!-- ── DOMAINS ── -->
+    <!-- ── DOMAINS (Modules) ── -->
     <section class="view" id="view-domains" aria-labelledby="domains-title">
       <header class="page-header">
         <div class="page-header-text">
-          <div class="page-overline">Knowledge Structure</div>
-          <h1 class="page-title" id="domains-title">Domains</h1>
-          <p class="page-subtitle">Top-level subject areas organizing all course concepts and technologies.</p>
+          <div class="page-overline">Course Structure</div>
+          <h1 class="page-title" id="domains-title">Modules</h1>
+          <p class="page-subtitle">The five modules of RFQ Communication Essentials, each targeting a distinct failure domain.</p>
         </div>
-        <div class="page-actions"><button class="btn btn-primary" data-route-to="concepts">+ Add Domain</button></div>
       </header>
       <div class="section">
         <div class="content-grid" id="domains-grid">
-          <div style="text-align:center;padding:var(--space-8);color:var(--color-text-faint);font-size:var(--text-sm)">Loading domains…</div>
+          <div style="text-align:center;padding:var(--space-8);color:var(--color-text-faint);font-size:var(--text-sm)">Loading modules…</div>
         </div>
       </div>
     </section>
@@ -189,11 +177,10 @@
     <section class="view" id="view-concepts" aria-labelledby="concepts-title">
       <header class="page-header">
         <div class="page-header-text">
-          <div class="page-overline">Core Content</div>
+          <div class="page-overline">Core Principles</div>
           <h1 class="page-title" id="concepts-title">Concepts</h1>
-          <p class="page-subtitle">Individual learning units with body content, difficulty, and examples.</p>
+          <p class="page-subtitle">The governing principles behind every lesson — what makes a system correct, not just functional.</p>
         </div>
-        <div class="page-actions"><button class="btn btn-primary" data-route-to="concepts">+ New Concept</button></div>
       </header>
       <div class="section">
         <div class="filter-bar">
@@ -201,7 +188,7 @@
             <svg width="14" height="14" viewBox="0 0 16 16" fill="none" stroke="currentColor" stroke-width="1.5" aria-hidden="true"><circle cx="7" cy="7" r="5.5"/><path d="M11 11 L14 14"/></svg>
             <input type="search" id="concepts-search" placeholder="Search concepts…" aria-label="Search concepts">
           </div>
-          <select class="filter-select" id="concepts-filter-domain" aria-label="Filter by domain"><option value="">All Domains</option></select>
+          <select class="filter-select" id="concepts-filter-domain" aria-label="Filter by module"><option value="">All Modules</option></select>
           <select class="filter-select" id="concepts-filter-difficulty" aria-label="Filter by difficulty">
             <option value="">All Levels</option>
             <option value="beginner">Beginner</option>
@@ -224,45 +211,14 @@
       </div>
     </section>
 
-    <!-- ── TECHNOLOGIES ── -->
-    <section class="view" id="view-technologies" aria-labelledby="tech-title">
-      <header class="page-header">
-        <div class="page-header-text">
-          <div class="page-overline">Stack Reference</div>
-          <h1 class="page-title" id="tech-title">Technologies</h1>
-          <p class="page-subtitle">Tools, frameworks, and platforms referenced across course concepts.</p>
-        </div>
-        <div class="page-actions"><button class="btn btn-primary" data-route-to="technologies">+ Add Technology</button></div>
-      </header>
-      <div class="section">
-        <div class="data-table-wrap">
-          <div class="data-table-header">
-            <span class="data-table-title">All Technologies</span>
-            <span class="data-table-count" id="tech-count">—</span>
-          </div>
-          <table aria-label="Technologies">
-            <thead><tr>
-              <th scope="col">Name</th><th scope="col">Slug</th>
-              <th scope="col">Version</th><th scope="col">Domain</th>
-              <th scope="col">Docs</th><th scope="col">Status</th>
-            </tr></thead>
-            <tbody id="tech-tbody">
-              <tr><td colspan="6" style="text-align:center;padding:var(--space-8);color:var(--color-text-faint)">Loading…</td></tr>
-            </tbody>
-          </table>
-        </div>
-      </div>
-    </section>
-
     <!-- ── GLOSSARY ── -->
     <section class="view" id="view-glossary" aria-labelledby="glossary-title">
       <header class="page-header">
         <div class="page-header-text">
           <div class="page-overline">Vocabulary</div>
           <h1 class="page-title" id="glossary-title">Glossary</h1>
-          <p class="page-subtitle">Defined terms tied to concepts, technologies, and domains.</p>
+          <p class="page-subtitle">Precise definitions for every term used across the RFQ Communication Essentials course.</p>
         </div>
-        <div class="page-actions"><button class="btn btn-primary" data-route-to="glossary">+ Define Term</button></div>
       </header>
       <div class="section">
         <div class="filter-bar">
@@ -280,55 +236,56 @@
           </div>
           <table aria-label="Glossary">
             <thead><tr>
-              <th scope="col">Term</th><th scope="col">Slug</th>
-              <th scope="col">Definition</th><th scope="col">Concept</th>
+              <th scope="col">Term</th>
+              <th scope="col">Definition</th>
+              <th scope="col">Concept</th>
               <th scope="col">Status</th>
             </tr></thead>
             <tbody id="glossary-tbody">
-              <tr><td colspan="5" style="text-align:center;padding:var(--space-8);color:var(--color-text-faint)">Loading…</td></tr>
+              <tr><td colspan="4" style="text-align:center;padding:var(--space-8);color:var(--color-text-faint)">Loading…</td></tr>
             </tbody>
           </table>
         </div>
       </div>
     </section>
 
-    <!-- ── EXAMPLES ── -->
+    <!-- ── EXAMPLES (Walkthroughs) ── -->
     <section class="view" id="view-examples" aria-labelledby="examples-title">
       <header class="page-header">
         <div class="page-header-text">
-          <div class="page-overline">Applied Knowledge</div>
-          <h1 class="page-title" id="examples-title">Code Examples</h1>
-          <p class="page-subtitle">Code snippets, formulas, and diagrams attached to concepts.</p>
+          <div class="page-overline">Applied Learning</div>
+          <h1 class="page-title" id="examples-title">Walkthroughs</h1>
+          <p class="page-subtitle">An end-to-end RFQ lifecycle in five stages, plus a failure reference table — each tied to the principles that prevent the failure.</p>
         </div>
-        <div class="page-actions"><button class="btn btn-primary" data-route-to="examples">+ Add Example</button></div>
       </header>
       <div class="section">
         <div class="content-grid" id="examples-grid">
-          <div style="text-align:center;padding:var(--space-8);color:var(--color-text-faint);font-size:var(--text-sm)">Loading examples…</div>
+          <div style="text-align:center;padding:var(--space-8);color:var(--color-text-faint);font-size:var(--text-sm)">Loading walkthroughs…</div>
         </div>
       </div>
     </section>
 
-    <!-- ── SOURCES ── -->
+    <!-- ── SOURCES (Source Modules) ── -->
     <section class="view" id="view-sources" aria-labelledby="sources-title">
       <header class="page-header">
         <div class="page-header-text">
-          <div class="page-overline">References</div>
-          <h1 class="page-title" id="sources-title">Sources</h1>
-          <p class="page-subtitle">Books, articles, docs, videos, and original references.</p>
+          <div class="page-overline">Source Material</div>
+          <h1 class="page-title" id="sources-title">Source Modules</h1>
+          <p class="page-subtitle">The five course modules this content is drawn from. Each module contains lessons, concepts, and a Work Lab.</p>
         </div>
-        <div class="page-actions"><button class="btn btn-primary" data-route-to="sources">+ Cite Source</button></div>
       </header>
       <div class="section">
         <div class="data-table-wrap">
           <div class="data-table-header">
-            <span class="data-table-title">All Sources</span>
+            <span class="data-table-title">Modules</span>
             <span class="data-table-count" id="sources-count">—</span>
           </div>
-          <table aria-label="Sources">
+          <table aria-label="Source modules">
             <thead><tr>
-              <th scope="col">Title</th><th scope="col">Type</th>
-              <th scope="col">Author</th><th scope="col">Year</th>
+              <th scope="col">Module</th>
+              <th scope="col">Type</th>
+              <th scope="col">Author</th>
+              <th scope="col">Year</th>
               <th scope="col">Link</th>
             </tr></thead>
             <tbody id="sources-tbody">
@@ -350,7 +307,7 @@
   </button>
   <button class="mobile-nav-item" data-route="domains">
     <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5" aria-hidden="true"><circle cx="12" cy="12" r="9"/><path d="M12 3c-3 3-3 13 0 18 3-3 3-13 0-18Z"/><path d="M3 12h18"/></svg>
-    Domains
+    Modules
   </button>
   <button class="mobile-nav-item" data-route="concepts">
     <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5" aria-hidden="true"><path d="M12 2 L22 7 L22 17 L12 22 L2 17 L2 7 Z"/><circle cx="12" cy="12" r="3"/></svg>
@@ -362,7 +319,7 @@
   </button>
   <button class="mobile-nav-item" data-route="examples">
     <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5" aria-hidden="true"><rect x="4" y="4" width="16" height="16" rx="3"/><path d="M9 10l3 3-3 3M13 16h3"/></svg>
-    Examples
+    Walkthroughs
   </button>
 </nav>
 
