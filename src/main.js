@@ -2,7 +2,7 @@
    MAIN — App bootstrap
    ============================================================ */
 import { router } from './utils/router.js';
-import { getCounts, getDomains, getConcepts, getGlossaryTerms, getExamples, getExampleById, getSources } from './supabase.js';
+import { getCounts, getDomains, getConcepts, getConceptById, getGlossaryTerms, getExamples, getExampleById, getSources } from './supabase.js';
 import { difficultyChip, statusChip, truncate } from './utils/formatters.js';
 import { renderMarkdown } from './utils/markdown.js';
 
@@ -26,6 +26,7 @@ document.addEventListener('DOMContentLoaded', () => {
 
   router.onDetail((type, id) => {
     if (type === 'examples') loadExampleDetail(id);
+    if (type === 'concepts') loadConceptDetail(id);
   });
 
   router.init();
@@ -50,8 +51,14 @@ document.addEventListener('DOMContentLoaded', () => {
 
   // Example detail card clicks
   document.addEventListener('click', (e) => {
-    const card = e.target.closest('[data-example-id]');
-    if (card) router.navigateToDetail('examples', card.dataset.exampleId);
+    const exCard = e.target.closest('[data-example-id]');
+    if (exCard) router.navigateToDetail('examples', exCard.dataset.exampleId);
+  });
+
+  // Concept detail card clicks
+  document.addEventListener('click', (e) => {
+    const cCard = e.target.closest('[data-concept-id]');
+    if (cCard) router.navigateToDetail('concepts', cCard.dataset.conceptId);
   });
 
   // Filter wiring — concepts
@@ -124,7 +131,8 @@ async function loadConcepts(filters = {}) {
     const cards = concepts.map(c => {
       const tags = (c.tags ?? []).map(t => `<span class="tag-chip">${t.tag?.name ?? t}</span>`).join('');
       return `
-        <article class="content-card" tabindex="0">
+        <article class="content-card content-card--clickable" tabindex="0" role="button"
+          aria-label="Open ${c.name}" data-concept-id="${c.id}">
           <div class="card-top">
             <div class="card-icon concept">💡</div>
             ${difficultyChip(c.difficulty)}
@@ -136,11 +144,58 @@ async function loadConcepts(filters = {}) {
             <span>·</span>
             <span>${c.format ?? 'text'}</span>
             ${tags ? `<span>·</span>${tags}` : ''}
+            <span class="card-cta">→ Read</span>
           </div>
         </article>`;
     }).join('');
     setEl('concepts-grid', cards || emptyState('No Concepts', 'Concepts matching your filters will appear here.'));
   } catch (e) { console.error('[Concepts]', e); }
+}
+
+/* ── CONCEPT DETAIL ─────────────────────────────────────────── */
+async function loadConceptDetail(id) {
+  setEl('concept-detail-body', '<div class="prose-loading">Loading…</div>');
+  setEl('concept-detail-title', '');
+  setEl('concept-detail-meta', '');
+  try {
+    const c = await getConceptById(id);
+    if (!c) {
+      setEl('concept-detail-body', emptyState('Not Found', 'This concept could not be loaded.'));
+      return;
+    }
+
+    const breadcrumb = document.getElementById('breadcrumb-current');
+    if (breadcrumb) breadcrumb.textContent = c.name;
+
+    setEl('concept-detail-title', c.name);
+
+    const tags = (c.tags ?? []).map(t => `<span class="tag-chip">${t.tag?.name ?? t}</span>`).join('');
+    setEl('concept-detail-meta', `
+      ${difficultyChip(c.difficulty)}
+      ${c.domain?.name ? `<span class="tag-chip">${c.domain.name}</span>` : ''}
+      ${tags}
+      ${statusChip(c.status)}
+    `);
+
+    // Body: prefer full body, fall back to summary
+    const bodyHtml = c.body
+      ? renderMarkdown(c.body)
+      : `<p class="prose-p" style="color:var(--color-text-muted);font-style:italic">${c.summary ?? 'No content yet.'}</p>`;
+
+    // Glossary terms panel
+    const glossaryHtml = (c.glossary_terms ?? []).length
+      ? `<div class="prose-hr"></div>
+         <h2 class="prose-h2">Related Terms</h2>
+         <ul class="prose-list">${(c.glossary_terms).map(t =>
+           `<li><strong>${t.term}</strong> — ${t.definition}</li>`
+         ).join('')}</ul>`
+      : '';
+
+    setEl('concept-detail-body', bodyHtml + glossaryHtml);
+  } catch (e) {
+    console.error('[ConceptDetail]', e);
+    setEl('concept-detail-body', emptyState('Error', 'Could not load this concept.'));
+  }
 }
 
 /* ── GLOSSARY ───────────────────────────────────────────────── */

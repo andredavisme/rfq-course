@@ -4,13 +4,14 @@
    ============================================================ */
 
 const ROUTES = {
-  dashboard: { label: 'Dashboard',       viewId: 'view-dashboard' },
-  domains:   { label: 'Modules',         viewId: 'view-domains' },
-  concepts:  { label: 'Concepts',        viewId: 'view-concepts' },
-  glossary:  { label: 'Glossary',        viewId: 'view-glossary' },
-  examples:  { label: 'Walkthroughs',    viewId: 'view-examples' },
-  sources:   { label: 'Source Modules',  viewId: 'view-sources' },
-  'example-detail': { label: 'Walkthrough', viewId: 'view-example-detail' },
+  dashboard:       { label: 'Dashboard',       viewId: 'view-dashboard' },
+  domains:         { label: 'Modules',         viewId: 'view-domains' },
+  concepts:        { label: 'Concepts',        viewId: 'view-concepts' },
+  glossary:        { label: 'Glossary',        viewId: 'view-glossary' },
+  examples:        { label: 'Walkthroughs',    viewId: 'view-examples' },
+  sources:         { label: 'Source Modules',  viewId: 'view-sources' },
+  'example-detail': { label: 'Walkthrough',   viewId: 'view-example-detail' },
+  'concept-detail': { label: 'Concept',       viewId: 'view-concept-detail' },
 };
 
 const DEFAULT_ROUTE = 'dashboard';
@@ -39,11 +40,11 @@ class Router {
   _handleHash() {
     const raw = window.location.hash.replace('#', '') || DEFAULT_ROUTE;
 
-    // Detect detail pattern: examples/42
+    // Detect detail pattern: examples/42 or concepts/42
     const detailMatch = raw.match(/^([a-z-]+)\/([^/]+)$/);
     if (detailMatch) {
       const [, type, id] = detailMatch;
-      const detailRouteKey = `${type.replace(/s$/, '')}-detail`; // examples → example-detail
+      const detailRouteKey = `${type.replace(/s$/, '')}-detail`; // examples → example-detail, concepts → concept-detail
       const route = ROUTES[detailRouteKey];
       if (route && this._onDetail) {
         this._activate(detailRouteKey, route, `${type}/${id}`);
@@ -69,7 +70,7 @@ class Router {
     if (crumb) crumb.textContent = route.label;
 
     // Sidebar active state — highlight parent section for detail views
-    const parentKey = key.replace('-detail', 's'); // example-detail → examples
+    const parentKey = key.replace('-detail', 's'); // example-detail → examples, concept-detail → concepts
     document.querySelectorAll('.sidebar-item[data-route]').forEach(btn => {
       btn.classList.toggle('active', btn.dataset.route === key || btn.dataset.route === parentKey);
     });

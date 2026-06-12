@@ -46,6 +46,22 @@ export async function getConcepts({ domainId, difficulty, status, format, search
   return data;
 }
 
+export async function getConceptById(id) {
+  const { data, error } = await supabase
+    .from('concepts')
+    .select(`
+      id, name, slug, summary, body, difficulty, status, format, created_at,
+      domain:domains(id, name, slug, color),
+      source:sources(id, title, author, url, year, type),
+      tags:concept_tags(tag:tags(id, name, color)),
+      glossary_terms:glossary(id, term, slug, definition, status)
+    `)
+    .eq('id', id)
+    .single();
+  if (error) throw error;
+  return data;
+}
+
 export async function getConceptBySlug(slug) {
   const { data, error } = await supabase
     .from('concepts')
