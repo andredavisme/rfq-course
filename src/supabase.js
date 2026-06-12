@@ -11,7 +11,7 @@ const SUPABASE_KEY  = 'sb_publishable_Lc7rXKQ-1TJaQFu7a-nOVQ_5Sf3x__M';
 export const supabase = createClient(SUPABASE_URL, SUPABASE_KEY);
 
 /* ──────────────────────────────────────────
-   DOMAINS
+   DOMAINS (Modules)
    Table: public.domains
    ────────────────────────────────────────── */
 
@@ -66,7 +66,6 @@ export async function getConceptBySlug(slug) {
     .select(`
       *,
       domain:domains(id, name, slug, color),
-      technology:technologies(id, name, slug, version),
       source:sources(id, title, author, url, year, type),
       tags:concept_tags(tag:tags(id, name, color)),
       examples(id, title, body, format, language, order_index, status),
@@ -87,28 +86,6 @@ export async function getConceptRelationships(conceptId) {
       to_concept:concepts!to_concept_id(id, name, slug, difficulty)
     `)
     .or(`from_concept_id.eq.${conceptId},to_concept_id.eq.${conceptId}`);
-  if (error) throw error;
-  return data;
-}
-
-/* ──────────────────────────────────────────
-   TECHNOLOGIES
-   Table: public.technologies
-   ────────────────────────────────────────── */
-
-export async function getTechnologies({ domainId, isActive } = {}) {
-  let query = supabase
-    .from('technologies')
-    .select(`
-      id, name, slug, description, version, logo_url, docs_url, is_active, sort_order,
-      domain:domains(id, name, slug)
-    `)
-    .order('sort_order');
-
-  if (domainId !== undefined) query = query.eq('domain_id', domainId);
-  if (isActive !== undefined) query = query.eq('is_active', isActive);
-
-  const { data, error } = await query;
   if (error) throw error;
   return data;
 }
@@ -138,7 +115,7 @@ export async function getGlossaryTerms({ domainId, search, status = 'published' 
 }
 
 /* ──────────────────────────────────────────
-   EXAMPLES
+   EXAMPLES (Walkthroughs)
    Table: public.examples
    ────────────────────────────────────────── */
 
@@ -161,7 +138,7 @@ export async function getExamples({ conceptId, format, status = 'published' } = 
 }
 
 /* ──────────────────────────────────────────
-   SOURCES
+   SOURCES (Source Modules)
    Table: public.sources
    ────────────────────────────────────────── */
 
@@ -198,22 +175,22 @@ export async function getTags({ domainId } = {}) {
 }
 
 /* ──────────────────────────────────────────
-   COUNTS — for dashboard stat cards
+   COUNTS — dashboard stat cards
    ────────────────────────────────────────── */
 
 export async function getCounts() {
-  const [domains, concepts, technologies, glossary, examples] = await Promise.all([
+  const [domains, concepts, glossary, examples, sources] = await Promise.all([
     supabase.from('domains').select('*', { count: 'exact', head: true }),
     supabase.from('concepts').select('*', { count: 'exact', head: true }),
-    supabase.from('technologies').select('*', { count: 'exact', head: true }).eq('is_active', true),
     supabase.from('glossary').select('*', { count: 'exact', head: true }).eq('status', 'published'),
     supabase.from('examples').select('*', { count: 'exact', head: true }).eq('status', 'published'),
+    supabase.from('sources').select('*', { count: 'exact', head: true }),
   ]);
   return {
-    domains:      domains.count      ?? 0,
-    concepts:     concepts.count     ?? 0,
-    technologies: technologies.count ?? 0,
-    glossary:     glossary.count     ?? 0,
-    examples:     examples.count     ?? 0,
+    domains:  domains.count  ?? 0,
+    concepts: concepts.count ?? 0,
+    glossary: glossary.count ?? 0,
+    examples: examples.count ?? 0,
+    sources:  sources.count  ?? 0,
   };
 }

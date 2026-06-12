@@ -3,19 +3,18 @@
    Imports router + supabase, wires up nav, loads default view.
    ============================================================ */
 import { router } from './utils/router.js';
-import { getCounts, getDomains, getConcepts, getTechnologies, getGlossaryTerms, getExamples, getSources } from './supabase.js';
+import { getCounts, getDomains, getConcepts, getGlossaryTerms, getExamples, getSources } from './supabase.js';
 import { difficultyChip, statusChip, formatDate, truncate } from './utils/formatters.js';
 import { DIFFICULTY_LEVELS, ENTRY_STATUSES, CONTENT_FORMATS, SOURCE_TYPES } from './utils/constants.js';
 
 /* ── View loader registry ─────────────────────────────────── */
 const VIEW_LOADERS = {
-  dashboard:    loadDashboard,
-  domains:      loadDomains,
-  concepts:     loadConcepts,
-  technologies: loadTechnologies,
-  glossary:     loadGlossary,
-  examples:     loadExamples,
-  sources:      loadSources,
+  dashboard: loadDashboard,
+  domains:   loadDomains,
+  concepts:  loadConcepts,
+  glossary:  loadGlossary,
+  examples:  loadExamples,
+  sources:   loadSources,
 };
 
 /* ── Bootstrap ─────────────────────────────────────────────── */
@@ -26,21 +25,20 @@ document.addEventListener('DOMContentLoaded', () => {
   });
   router.init();
 
-  // Fix 1: Wire sidebar + mobile nav [data-route] clicks to the router
+  // Wire sidebar + mobile nav [data-route] clicks to the router
   document.addEventListener('click', (e) => {
     const navTarget = e.target.closest('[data-route]');
     if (navTarget) router.navigate(navTarget.dataset.route);
   });
 
-  // Fix 2: Delegated handler for [data-route-to] (domain cards, page header buttons, etc.)
-  // Passes optional domain filter when data-domain-id is present
+  // Delegated handler for [data-route-to] (module cards, etc.)
   document.addEventListener('click', (e) => {
     const target = e.target.closest('[data-route-to]');
     if (!target) return;
     const routeKey = target.dataset.routeTo;
     if (!routeKey) return;
     router.navigate(routeKey);
-    // Fix 3: Pass domain filter through when navigating from a domain card
+    // Pass domain filter when navigating from a module card
     if (routeKey === 'concepts' && target.dataset.domainId) {
       loadConcepts({ domain_id: target.dataset.domainId });
     }
@@ -53,24 +51,15 @@ function setEl(id, html) {
   if (el) el.innerHTML = html;
 }
 
-function populateSelect(id, items, valueKey = 'value', labelKey = 'label') {
-  const el = document.getElementById(id);
-  if (!el) return;
-  const opts = items.map(i => `<option value="${i[valueKey]}">${i[labelKey]}</option>`).join('');
-  el.innerHTML = `<option value="">All</option>${opts}`;
-}
-
 /* ── DASHBOARD ─────────────────────────────────────────────── */
 async function loadDashboard() {
   try {
     const counts = await getCounts();
-    const keys = ['domains', 'concepts', 'technologies', 'glossary', 'examples'];
-    keys.forEach(k => {
+    ['domains', 'concepts', 'glossary', 'examples', 'sources'].forEach(k => {
       const el = document.querySelector(`[data-stat="${k}"]`);
       if (el) el.textContent = counts[k];
     });
 
-    // Recent concepts table
     const recent = await getConcepts({ status: 'published' });
     const rows = recent.slice(0, 10).map(c => `
       <tr>
@@ -87,23 +76,20 @@ async function loadDashboard() {
   }
 }
 
-/* ── DOMAINS ────────────────────────────────────────────────── */
+/* ── DOMAINS (Modules) ──────────────────────────────────────── */
 async function loadDomains() {
   try {
     const domains = await getDomains();
     const cards = domains.map(d => `
       <article class="content-card" tabindex="0" data-route-to="concepts" data-domain-id="${d.id}">
         <div class="card-top">
-          <div class="card-icon domain">${d.icon ?? '🗂️'}</div>
+          <div class="card-icon domain">${d.icon ?? '📋'}</div>
         </div>
         <div class="card-title">${d.name}</div>
         <div class="card-summary">${truncate(d.description ?? 'No description.')}</div>
-        <div class="card-meta">
-          <span class="tag-chip">${d.slug}</span>
-        </div>
       </article>
     `).join('');
-    setEl('domains-grid', cards || emptyState('No Domains', 'Add domains in Supabase to see them here.'));
+    setEl('domains-grid', cards || emptyState('No Modules', 'Modules will appear here once loaded.'));
   } catch (e) {
     console.error('[Domains]', e);
   }
@@ -138,28 +124,6 @@ async function loadConcepts(filters = {}) {
   }
 }
 
-/* ── TECHNOLOGIES ───────────────────────────────────────────── */
-async function loadTechnologies() {
-  try {
-    const techs = await getTechnologies();
-    const rows = techs.map(t => `
-      <tr>
-        <td class="td-name">${t.name}</td>
-        <td class="td-mono">${t.slug}</td>
-        <td>${t.version ?? '—'}</td>
-        <td>${t.domain?.name ?? '—'}</td>
-        <td>${t.docs_url ? `<a href="${t.docs_url}" target="_blank" rel="noopener" style="color:var(--color-primary-hover);text-decoration:underline">Docs ↗</a>` : '—'}</td>
-        <td>${t.is_active ? '<span class="status-chip status-published">Active</span>' : '<span class="status-chip status-archived">Inactive</span>'}</td>
-      </tr>
-    `).join('');
-    setEl('tech-tbody', rows || '<tr><td colspan="6" style="text-align:center;color:var(--color-text-faint);padding:var(--space-8)">No technologies yet</td></tr>');
-    const countEl = document.getElementById('tech-count');
-    if (countEl) countEl.textContent = `${techs.filter(t => t.is_active).length} active`;
-  } catch (e) {
-    console.error('[Technologies]', e);
-  }
-}
-
 /* ── GLOSSARY ───────────────────────────────────────────────── */
 async function loadGlossary(filters = {}) {
   try {
@@ -167,13 +131,12 @@ async function loadGlossary(filters = {}) {
     const rows = terms.map(t => `
       <tr>
         <td class="td-name">${t.term}</td>
-        <td class="td-mono">${t.slug}</td>
-        <td style="max-width:300px;white-space:nowrap;overflow:hidden;text-overflow:ellipsis">${truncate(t.definition, 80)}</td>
+        <td style="max-width:340px;white-space:nowrap;overflow:hidden;text-overflow:ellipsis">${truncate(t.definition, 100)}</td>
         <td>${t.concept?.name ?? '—'}</td>
         <td>${statusChip(t.status)}</td>
       </tr>
     `).join('');
-    setEl('glossary-tbody', rows || '<tr><td colspan="5" style="text-align:center;color:var(--color-text-faint);padding:var(--space-8)">No terms yet</td></tr>');
+    setEl('glossary-tbody', rows || '<tr><td colspan="4" style="text-align:center;color:var(--color-text-faint);padding:var(--space-8)">No terms yet</td></tr>');
     const countEl = document.getElementById('glossary-count');
     if (countEl) countEl.textContent = `${terms.length} terms`;
   } catch (e) {
@@ -181,31 +144,29 @@ async function loadGlossary(filters = {}) {
   }
 }
 
-/* ── EXAMPLES ───────────────────────────────────────────────── */
+/* ── EXAMPLES (Walkthroughs) ────────────────────────────────── */
 async function loadExamples() {
   try {
     const examples = await getExamples();
+    const formatLabel = { mixed: 'Walkthrough', table: 'Reference Table', text: 'Text', code: 'Code', diagram: 'Diagram' };
     const cards = examples.map(ex => `
       <article class="content-card" tabindex="0">
         <div class="card-top">
-          <div class="card-icon concept">💻</div>
-          <span class="tag-chip">${ex.format ?? 'code'}</span>
+          <div class="card-icon concept">${ex.format === 'table' ? '📊' : '🗺️'}</div>
+          <span class="tag-chip">${formatLabel[ex.format] ?? ex.format}</span>
         </div>
         <div class="card-title">${ex.title}</div>
-        <div class="card-summary">${ex.concept?.name ?? ''}</div>
-        <div class="card-meta">
-          ${ex.language ? `<span class="tag-chip">${ex.language}</span>` : ''}
-          ${statusChip(ex.status)}
-        </div>
+        <div class="card-summary">${truncate(ex.concept?.name ?? '', 80)}</div>
+        <div class="card-meta">${statusChip(ex.status)}</div>
       </article>
     `).join('');
-    setEl('examples-grid', cards || emptyState('No Examples', 'Code examples attached to concepts will appear here.'));
+    setEl('examples-grid', cards || emptyState('No Walkthroughs', 'Walkthrough examples will appear here.'));
   } catch (e) {
     console.error('[Examples]', e);
   }
 }
 
-/* ── SOURCES ─────────────────────────────────────────────────── */
+/* ── SOURCES (Source Modules) ───────────────────────────────── */
 async function loadSources() {
   try {
     const sources = await getSources();
@@ -215,12 +176,12 @@ async function loadSources() {
         <td><span class="tag-chip">${s.type}</span></td>
         <td>${s.author ?? '—'}</td>
         <td>${s.year ?? '—'}</td>
-        <td>${s.url ? `<a href="${s.url}" target="_blank" rel="noopener" style="color:var(--color-primary-hover);text-decoration:underline">Link ↗</a>` : '—'}</td>
+        <td>${s.url ? `<a href="${s.url}" target="_blank" rel="noopener" style="color:var(--color-primary-hover);text-decoration:underline">View ↗</a>` : '—'}</td>
       </tr>
     `).join('');
-    setEl('sources-tbody', rows || '<tr><td colspan="5" style="text-align:center;color:var(--color-text-faint);padding:var(--space-8)">No sources yet</td></tr>');
+    setEl('sources-tbody', rows || '<tr><td colspan="5" style="text-align:center;color:var(--color-text-faint);padding:var(--space-8)">No source modules yet</td></tr>');
     const countEl = document.getElementById('sources-count');
-    if (countEl) countEl.textContent = `${sources.length} sources`;
+    if (countEl) countEl.textContent = `${sources.length} modules`;
   } catch (e) {
     console.error('[Sources]', e);
   }
