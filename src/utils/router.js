@@ -4,6 +4,7 @@
    ============================================================ */
 
 const ROUTES = {
+  introduction:    { label: 'Introduction',    viewId: 'view-introduction' },
   dashboard:       { label: 'Dashboard',       viewId: 'view-dashboard' },
   domains:         { label: 'Modules',         viewId: 'view-domains' },
   concepts:        { label: 'Concepts',        viewId: 'view-concepts' },
@@ -65,12 +66,12 @@ class Router {
     const viewEl = document.getElementById(route.viewId);
     if (viewEl) viewEl.classList.add('active');
 
-    // Breadcrumb — show parent for detail views
+    // Breadcrumb
     const crumb = document.getElementById('breadcrumb-current');
     if (crumb) crumb.textContent = route.label;
 
-    // Sidebar active state — highlight parent section for detail views
-    const parentKey = key.replace('-detail', 's'); // example-detail → examples, concept-detail → concepts
+    // Sidebar active state
+    const parentKey = key.replace('-detail', 's');
     document.querySelectorAll('.sidebar-item[data-route]').forEach(btn => {
       btn.classList.toggle('active', btn.dataset.route === key || btn.dataset.route === parentKey);
     });
