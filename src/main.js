@@ -205,7 +205,7 @@ async function loadGlossary(filters = {}) {
     const rows = terms.map(t => `
       <tr>
         <td class="td-name">${t.term}</td>
-        <td style="max-width:340px;white-space:nowrap;overflow:hidden;text-overflow:ellipsis">${truncate(t.definition, 100)}</td>
+        <td class="td-definition">${t.definition}</td>
         <td>${t.concept?.name ?? '—'}</td>
         <td>${statusChip(t.status)}</td>
       </tr>`).join('');
