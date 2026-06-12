@@ -54,7 +54,7 @@ export async function getConceptById(id) {
       domain:domains(id, name, slug, color),
       source:sources(id, title, author, url, year, type),
       tags:concept_tags(tag:tags(id, name, color)),
-      glossary_terms:glossary(id, term, slug, definition, status)
+      glossary_terms:glossary(id, term, slug, definition, status, module_slug)
     `)
     .eq('id', id)
     .single();
@@ -71,7 +71,7 @@ export async function getConceptBySlug(slug) {
       source:sources(id, title, author, url, year, type),
       tags:concept_tags(tag:tags(id, name, color)),
       examples(id, title, body, format, language, order_index, status),
-      glossary_terms:glossary(id, term, slug, definition, status)
+      glossary_terms:glossary(id, term, slug, definition, status, module_slug)
     `)
     .eq('slug', slug).single();
   if (error) throw error;
@@ -92,18 +92,19 @@ export async function getConceptRelationships(conceptId) {
 }
 
 /* ── GLOSSARY ────────────────────────────────────────────── */
-export async function getGlossaryTerms({ domainId, search, status = 'published' } = {}) {
+export async function getGlossaryTerms({ domainId, moduleSlug, search, status = 'published' } = {}) {
   let query = supabase
     .from('glossary')
     .select(`
-      id, term, slug, definition, status, created_at,
+      id, term, slug, definition, status, module_slug, created_at,
       domain:domains(id, name, slug),
       concept:concepts(id, name, slug)
     `)
     .eq('status', status)
     .order('term');
-  if (domainId) query = query.eq('domain_id', domainId);
-  if (search)   query = query.ilike('term', `%${search}%`);
+  if (domainId)   query = query.eq('domain_id', domainId);
+  if (moduleSlug) query = query.eq('module_slug', moduleSlug);
+  if (search)     query = query.ilike('term', `%${search}%`);
   const { data, error } = await query;
   if (error) throw error;
   return data;
