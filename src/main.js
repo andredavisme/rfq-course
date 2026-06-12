@@ -16,6 +16,31 @@ const VIEW_LOADERS = {
   sources:   loadSources,
 };
 
+/* ── Module slug → human-readable label ──────────────────── */
+const MODULE_LABELS = {
+  'module-01-seeing-failures':  'Module 1 — Seeing Failures',
+  'module-02-intake':           'Module 2 — Intake',
+  'module-03-communication':    'Module 3 — Communication',
+  'module-04-vendor-flows':     'Module 4 — Vendor Flows',
+  'module-05-governance':       'Module 5 — Governance',
+};
+
+const MODULE_URLS = {
+  'module-01-seeing-failures':  'https://github.com/andredavisme/RFQ-solutions/tree/main/course/module-01-seeing-failures',
+  'module-02-intake':           'https://github.com/andredavisme/RFQ-solutions/tree/main/course/module-02-intake',
+  'module-03-communication':    'https://github.com/andredavisme/RFQ-solutions/tree/main/course/module-03-communication',
+  'module-04-vendor-flows':     'https://github.com/andredavisme/RFQ-solutions/tree/main/course/module-04-vendor-flows',
+  'module-05-governance':       'https://github.com/andredavisme/RFQ-solutions/tree/main/course/module-05-governance',
+};
+
+function moduleLink(slug) {
+  if (!slug) return '—';
+  const label = MODULE_LABELS[slug] ?? slug;
+  const url   = MODULE_URLS[slug];
+  if (!url) return `<span class="tag-chip">${label}</span>`;
+  return `<a href="${url}" target="_blank" rel="noopener" style="color:var(--color-primary-hover);text-decoration:underline">${label} ↗</a>`;
+}
+
 /* ── Bootstrap ─────────────────────────────────────────────── */
 document.addEventListener('DOMContentLoaded', () => {
 
@@ -187,7 +212,7 @@ async function loadConceptDetail(id) {
       ? `<div class="prose-hr"></div>
          <h2 class="prose-h2">Related Terms</h2>
          <ul class="prose-list">${(c.glossary_terms).map(t =>
-           `<li><strong>${t.term}</strong> — ${t.definition}</li>`
+           `<li><strong>${t.term}</strong> — ${t.definition}${t.module_slug ? ` ${moduleLink(t.module_slug)}` : ''}</li>`
          ).join('')}</ul>`
       : '';
 
@@ -206,10 +231,11 @@ async function loadGlossary(filters = {}) {
       <tr>
         <td class="td-name">${t.term}</td>
         <td class="td-definition">${t.definition}</td>
+        <td>${moduleLink(t.module_slug)}</td>
         <td>${t.concept?.name ?? '—'}</td>
         <td>${statusChip(t.status)}</td>
       </tr>`).join('');
-    setEl('glossary-tbody', rows || '<tr><td colspan="4" style="text-align:center;color:var(--color-text-faint);padding:var(--space-8)">No terms yet</td></tr>');
+    setEl('glossary-tbody', rows || '<tr><td colspan="5" style="text-align:center;color:var(--color-text-faint);padding:var(--space-8)">No terms yet</td></tr>');
     const countEl = document.getElementById('glossary-count');
     if (countEl) countEl.textContent = `${terms.length} terms`;
   } catch (e) { console.error('[Glossary]', e); }
