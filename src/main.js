@@ -26,13 +26,24 @@ document.addEventListener('DOMContentLoaded', () => {
   });
   router.init();
 
-  // Delegated handler for any element with data-route-to
-  // Covers domain cards, page header buttons, and any future nav triggers
+  // Fix 1: Wire sidebar + mobile nav [data-route] clicks to the router
+  document.addEventListener('click', (e) => {
+    const navTarget = e.target.closest('[data-route]');
+    if (navTarget) router.navigate(navTarget.dataset.route);
+  });
+
+  // Fix 2: Delegated handler for [data-route-to] (domain cards, page header buttons, etc.)
+  // Passes optional domain filter when data-domain-id is present
   document.addEventListener('click', (e) => {
     const target = e.target.closest('[data-route-to]');
     if (!target) return;
     const routeKey = target.dataset.routeTo;
-    if (routeKey) router.navigate(routeKey);
+    if (!routeKey) return;
+    router.navigate(routeKey);
+    // Fix 3: Pass domain filter through when navigating from a domain card
+    if (routeKey === 'concepts' && target.dataset.domainId) {
+      loadConcepts({ domain_id: target.dataset.domainId });
+    }
   });
 });
 

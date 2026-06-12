@@ -30,8 +30,8 @@ class Router {
   /** Navigate to a named route and update the URL hash. */
   navigate(routeKey) {
     const route = ROUTES[routeKey] || ROUTES[DEFAULT_ROUTE];
-    // Update hash without triggering hashchange twice
-    history.replaceState(null, '', `#${routeKey}`);
+    // Use pushState so the back button works correctly
+    history.pushState(null, '', `#${routeKey}`);
     this._activate(routeKey, route);
   }
 
