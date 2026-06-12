@@ -1,20 +1,15 @@
 /* ============================================================
    SUPABASE CLIENT + QUERY HELPERS
    Project: nmemmfblpzrkwyljpmvp (us-east-2)
-   All data access for the RFQ Course platform lives here.
    ============================================================ */
 import { createClient } from 'https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2/+esm';
 
-const SUPABASE_URL  = 'https://nmemmfblpzrkwyljpmvp.supabase.co';
-const SUPABASE_KEY  = 'sb_publishable_Lc7rXKQ-1TJaQFu7a-nOVQ_5Sf3x__M';
+const SUPABASE_URL = 'https://nmemmfblpzrkwyljpmvp.supabase.co';
+const SUPABASE_KEY = 'sb_publishable_Lc7rXKQ-1TJaQFu7a-nOVQ_5Sf3x__M';
 
 export const supabase = createClient(SUPABASE_URL, SUPABASE_KEY);
 
-/* ──────────────────────────────────────────
-   DOMAINS (Modules)
-   Table: public.domains
-   ────────────────────────────────────────── */
-
+/* ── DOMAINS ────────────────────────────────────────────── */
 export async function getDomains() {
   const { data, error } = await supabase
     .from('domains')
@@ -26,19 +21,12 @@ export async function getDomains() {
 
 export async function getDomainBySlug(slug) {
   const { data, error } = await supabase
-    .from('domains')
-    .select('*')
-    .eq('slug', slug)
-    .single();
+    .from('domains').select('*').eq('slug', slug).single();
   if (error) throw error;
   return data;
 }
 
-/* ──────────────────────────────────────────
-   CONCEPTS
-   Table: public.concepts
-   ────────────────────────────────────────── */
-
+/* ── CONCEPTS ────────────────────────────────────────────── */
 export async function getConcepts({ domainId, difficulty, status, format, search } = {}) {
   let query = supabase
     .from('concepts')
@@ -48,13 +36,11 @@ export async function getConcepts({ domainId, difficulty, status, format, search
       tags:concept_tags(tag:tags(id, name, color))
     `)
     .order('created_at', { ascending: false });
-
   if (status)     query = query.eq('status', status);
   if (difficulty) query = query.eq('difficulty', difficulty);
   if (format)     query = query.eq('format', format);
   if (domainId)   query = query.eq('domain_id', domainId);
   if (search)     query = query.ilike('name', `%${search}%`);
-
   const { data, error } = await query;
   if (error) throw error;
   return data;
@@ -71,8 +57,7 @@ export async function getConceptBySlug(slug) {
       examples(id, title, body, format, language, order_index, status),
       glossary_terms:glossary(id, term, slug, definition, status)
     `)
-    .eq('slug', slug)
-    .single();
+    .eq('slug', slug).single();
   if (error) throw error;
   return data;
 }
@@ -90,11 +75,7 @@ export async function getConceptRelationships(conceptId) {
   return data;
 }
 
-/* ──────────────────────────────────────────
-   GLOSSARY
-   Table: public.glossary
-   ────────────────────────────────────────── */
-
+/* ── GLOSSARY ────────────────────────────────────────────── */
 export async function getGlossaryTerms({ domainId, search, status = 'published' } = {}) {
   let query = supabase
     .from('glossary')
@@ -105,79 +86,62 @@ export async function getGlossaryTerms({ domainId, search, status = 'published' 
     `)
     .eq('status', status)
     .order('term');
-
   if (domainId) query = query.eq('domain_id', domainId);
   if (search)   query = query.ilike('term', `%${search}%`);
-
   const { data, error } = await query;
   if (error) throw error;
   return data;
 }
 
-/* ──────────────────────────────────────────
-   EXAMPLES (Walkthroughs)
-   Table: public.examples
-   ────────────────────────────────────────── */
-
+/* ── EXAMPLES ────────────────────────────────────────────── */
 export async function getExamples({ conceptId, format, status = 'published' } = {}) {
   let query = supabase
     .from('examples')
-    .select(`
-      id, title, body, format, language, order_index, status,
-      concept:concepts(id, name, slug)
-    `)
+    .select(`id, title, body, format, language, order_index, status,
+      concept:concepts(id, name, slug)`)
     .eq('status', status)
     .order('order_index');
-
   if (conceptId) query = query.eq('concept_id', conceptId);
   if (format)    query = query.eq('format', format);
-
   const { data, error } = await query;
   if (error) throw error;
   return data;
 }
 
-/* ──────────────────────────────────────────
-   SOURCES (Source Modules)
-   Table: public.sources
-   ────────────────────────────────────────── */
+export async function getExampleById(id) {
+  const { data, error } = await supabase
+    .from('examples')
+    .select(`id, title, body, format, language, order_index, status,
+      concept:concepts(id, name, slug)`)
+    .eq('id', id)
+    .single();
+  if (error) throw error;
+  return data;
+}
 
+/* ── SOURCES ────────────────────────────────────────────── */
 export async function getSources({ type, search } = {}) {
   let query = supabase
     .from('sources')
     .select('id, title, author, publisher, year, url, isbn, type, notes')
     .order('year', { ascending: false });
-
   if (type)   query = query.eq('type', type);
   if (search) query = query.ilike('title', `%${search}%`);
-
   const { data, error } = await query;
   if (error) throw error;
   return data;
 }
 
-/* ──────────────────────────────────────────
-   TAGS
-   Table: public.tags
-   ────────────────────────────────────────── */
-
+/* ── TAGS ────────────────────────────────────────────── */
 export async function getTags({ domainId } = {}) {
-  let query = supabase
-    .from('tags')
-    .select('id, name, slug, color, domain_id')
-    .order('name');
-
+  let query = supabase.from('tags').select('id, name, slug, color, domain_id').order('name');
   if (domainId) query = query.eq('domain_id', domainId);
-
   const { data, error } = await query;
   if (error) throw error;
   return data;
 }
 
-/* ──────────────────────────────────────────
-   COUNTS — dashboard stat cards
-   ────────────────────────────────────────── */
-
+/* ── COUNTS ────────────────────────────────────────────── */
 export async function getCounts() {
   const [domains, concepts, glossary, examples, sources] = await Promise.all([
     supabase.from('domains').select('*', { count: 'exact', head: true }),

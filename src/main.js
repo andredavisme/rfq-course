@@ -1,11 +1,10 @@
 /* ============================================================
    MAIN — App bootstrap
-   Imports router + supabase, wires up nav, loads default view.
    ============================================================ */
 import { router } from './utils/router.js';
-import { getCounts, getDomains, getConcepts, getGlossaryTerms, getExamples, getSources } from './supabase.js';
-import { difficultyChip, statusChip, formatDate, truncate } from './utils/formatters.js';
-import { DIFFICULTY_LEVELS, ENTRY_STATUSES, CONTENT_FORMATS, SOURCE_TYPES } from './utils/constants.js';
+import { getCounts, getDomains, getConcepts, getGlossaryTerms, getExamples, getExampleById, getSources } from './supabase.js';
+import { difficultyChip, statusChip, truncate } from './utils/formatters.js';
+import { renderMarkdown } from './utils/markdown.js';
 
 /* ── View loader registry ─────────────────────────────────── */
 const VIEW_LOADERS = {
@@ -19,33 +18,63 @@ const VIEW_LOADERS = {
 
 /* ── Bootstrap ─────────────────────────────────────────────── */
 document.addEventListener('DOMContentLoaded', () => {
+
   router.onNavigate((key) => {
     const loader = VIEW_LOADERS[key];
     if (loader) loader();
   });
+
+  router.onDetail((type, id) => {
+    if (type === 'examples') loadExampleDetail(id);
+  });
+
   router.init();
 
-  // Wire sidebar + mobile nav [data-route] clicks to the router
+  // Sidebar + mobile nav
   document.addEventListener('click', (e) => {
     const navTarget = e.target.closest('[data-route]');
     if (navTarget) router.navigate(navTarget.dataset.route);
   });
 
-  // Delegated handler for [data-route-to] (module cards, etc.)
+  // data-route-to (module cards, back buttons, etc.)
   document.addEventListener('click', (e) => {
     const target = e.target.closest('[data-route-to]');
     if (!target) return;
     const routeKey = target.dataset.routeTo;
     if (!routeKey) return;
     router.navigate(routeKey);
-    // Pass domain filter when navigating from a module card
     if (routeKey === 'concepts' && target.dataset.domainId) {
       loadConcepts({ domain_id: target.dataset.domainId });
     }
   });
+
+  // Example detail card clicks
+  document.addEventListener('click', (e) => {
+    const card = e.target.closest('[data-example-id]');
+    if (card) router.navigateToDetail('examples', card.dataset.exampleId);
+  });
+
+  // Filter wiring — concepts
+  document.getElementById('concepts-search')?.addEventListener('input', (e) => {
+    loadConcepts({ search: e.target.value });
+  });
+  document.getElementById('concepts-filter-domain')?.addEventListener('change', (e) => {
+    loadConcepts({ domainId: e.target.value || undefined });
+  });
+  document.getElementById('concepts-filter-difficulty')?.addEventListener('change', (e) => {
+    loadConcepts({ difficulty: e.target.value || undefined });
+  });
+  document.getElementById('concepts-filter-status')?.addEventListener('change', (e) => {
+    loadConcepts({ status: e.target.value || undefined });
+  });
+
+  // Filter wiring — glossary
+  document.getElementById('glossary-search')?.addEventListener('input', (e) => {
+    loadGlossary({ search: e.target.value });
+  });
 });
 
-/* ── Helpers ──────────────────────────────────────────────── */
+/* ── Helpers ─────────────────────────────────────────────── */
 function setEl(id, html) {
   const el = document.getElementById(id);
   if (el) el.innerHTML = html;
@@ -59,7 +88,6 @@ async function loadDashboard() {
       const el = document.querySelector(`[data-stat="${k}"]`);
       if (el) el.textContent = counts[k];
     });
-
     const recent = await getConcepts({ status: 'published' });
     const rows = recent.slice(0, 10).map(c => `
       <tr>
@@ -68,12 +96,9 @@ async function loadDashboard() {
         <td>${difficultyChip(c.difficulty)}</td>
         <td>${c.format ?? '—'}</td>
         <td>${statusChip(c.status)}</td>
-      </tr>
-    `).join('');
+      </tr>`).join('');
     setEl('dash-concepts-tbody', rows || '<tr><td colspan="5" style="text-align:center;color:var(--color-text-faint);padding:var(--space-8)">No concepts yet</td></tr>');
-  } catch (e) {
-    console.error('[Dashboard]', e);
-  }
+  } catch (e) { console.error('[Dashboard]', e); }
 }
 
 /* ── DOMAINS (Modules) ──────────────────────────────────────── */
@@ -87,12 +112,9 @@ async function loadDomains() {
         </div>
         <div class="card-title">${d.name}</div>
         <div class="card-summary">${truncate(d.description ?? 'No description.')}</div>
-      </article>
-    `).join('');
+      </article>`).join('');
     setEl('domains-grid', cards || emptyState('No Modules', 'Modules will appear here once loaded.'));
-  } catch (e) {
-    console.error('[Domains]', e);
-  }
+  } catch (e) { console.error('[Domains]', e); }
 }
 
 /* ── CONCEPTS ───────────────────────────────────────────────── */
@@ -115,13 +137,10 @@ async function loadConcepts(filters = {}) {
             <span>${c.format ?? 'text'}</span>
             ${tags ? `<span>·</span>${tags}` : ''}
           </div>
-        </article>
-      `;
+        </article>`;
     }).join('');
     setEl('concepts-grid', cards || emptyState('No Concepts', 'Concepts matching your filters will appear here.'));
-  } catch (e) {
-    console.error('[Concepts]', e);
-  }
+  } catch (e) { console.error('[Concepts]', e); }
 }
 
 /* ── GLOSSARY ───────────────────────────────────────────────── */
@@ -134,39 +153,66 @@ async function loadGlossary(filters = {}) {
         <td style="max-width:340px;white-space:nowrap;overflow:hidden;text-overflow:ellipsis">${truncate(t.definition, 100)}</td>
         <td>${t.concept?.name ?? '—'}</td>
         <td>${statusChip(t.status)}</td>
-      </tr>
-    `).join('');
+      </tr>`).join('');
     setEl('glossary-tbody', rows || '<tr><td colspan="4" style="text-align:center;color:var(--color-text-faint);padding:var(--space-8)">No terms yet</td></tr>');
     const countEl = document.getElementById('glossary-count');
     if (countEl) countEl.textContent = `${terms.length} terms`;
-  } catch (e) {
-    console.error('[Glossary]', e);
-  }
+  } catch (e) { console.error('[Glossary]', e); }
 }
 
-/* ── EXAMPLES (Walkthroughs) ────────────────────────────────── */
+/* ── EXAMPLES (Walkthroughs list) ────────────────────────────────── */
 async function loadExamples() {
   try {
     const examples = await getExamples();
     const formatLabel = { mixed: 'Walkthrough', table: 'Reference Table', text: 'Text', code: 'Code', diagram: 'Diagram' };
     const cards = examples.map(ex => `
-      <article class="content-card" tabindex="0">
+      <article class="content-card content-card--clickable" tabindex="0" role="button"
+        aria-label="Open ${ex.title}" data-example-id="${ex.id}">
         <div class="card-top">
           <div class="card-icon concept">${ex.format === 'table' ? '📊' : '🗺️'}</div>
           <span class="tag-chip">${formatLabel[ex.format] ?? ex.format}</span>
         </div>
         <div class="card-title">${ex.title}</div>
         <div class="card-summary">${truncate(ex.concept?.name ?? '', 80)}</div>
-        <div class="card-meta">${statusChip(ex.status)}</div>
-      </article>
-    `).join('');
+        <div class="card-meta">
+          ${statusChip(ex.status)}
+          <span class="card-cta">→ Read</span>
+        </div>
+      </article>`).join('');
     setEl('examples-grid', cards || emptyState('No Walkthroughs', 'Walkthrough examples will appear here.'));
+  } catch (e) { console.error('[Examples]', e); }
+}
+
+/* ── EXAMPLE DETAIL ────────────────────────────────────────────── */
+async function loadExampleDetail(id) {
+  setEl('example-detail-body', '<div class="prose-loading">Loading…</div>');
+  setEl('example-detail-title', '');
+  setEl('example-detail-meta', '');
+  try {
+    const ex = await getExampleById(id);
+    if (!ex) {
+      setEl('example-detail-body', emptyState('Not Found', 'This walkthrough could not be loaded.'));
+      return;
+    }
+
+    const formatLabel = { mixed: 'Walkthrough', table: 'Reference Table', text: 'Text', code: 'Code', diagram: 'Diagram' };
+    const breadcrumb = document.getElementById('breadcrumb-current');
+    if (breadcrumb) breadcrumb.textContent = ex.title;
+
+    setEl('example-detail-title', ex.title);
+    setEl('example-detail-meta', `
+      <span class="tag-chip">${formatLabel[ex.format] ?? ex.format}</span>
+      ${ex.concept?.name ? `<span class="tag-chip tag-chip--concept">💡 ${ex.concept.name}</span>` : ''}
+      ${statusChip(ex.status)}
+    `);
+    setEl('example-detail-body', renderMarkdown(ex.body));
   } catch (e) {
-    console.error('[Examples]', e);
+    console.error('[ExampleDetail]', e);
+    setEl('example-detail-body', emptyState('Error', 'Could not load this walkthrough.'));
   }
 }
 
-/* ── SOURCES (Source Modules) ───────────────────────────────── */
+/* ── SOURCES ───────────────────────────────────────────────── */
 async function loadSources() {
   try {
     const sources = await getSources();
@@ -177,17 +223,14 @@ async function loadSources() {
         <td>${s.author ?? '—'}</td>
         <td>${s.year ?? '—'}</td>
         <td>${s.url ? `<a href="${s.url}" target="_blank" rel="noopener" style="color:var(--color-primary-hover);text-decoration:underline">View ↗</a>` : '—'}</td>
-      </tr>
-    `).join('');
+      </tr>`).join('');
     setEl('sources-tbody', rows || '<tr><td colspan="5" style="text-align:center;color:var(--color-text-faint);padding:var(--space-8)">No source modules yet</td></tr>');
     const countEl = document.getElementById('sources-count');
     if (countEl) countEl.textContent = `${sources.length} modules`;
-  } catch (e) {
-    console.error('[Sources]', e);
-  }
+  } catch (e) { console.error('[Sources]', e); }
 }
 
-/* ── EMPTY STATE helper ──────────────────────────────────────── */
+/* ── EMPTY STATE ─────────────────────────────────────────────── */
 function emptyState(title, message) {
   return `
     <div class="empty-state">
@@ -197,6 +240,5 @@ function emptyState(title, message) {
       </svg>
       <h3>${title}</h3>
       <p>${message}</p>
-    </div>
-  `;
+    </div>`;
 }
