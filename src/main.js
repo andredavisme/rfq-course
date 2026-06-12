@@ -8,6 +8,7 @@ import { renderMarkdown } from './utils/markdown.js';
 
 /* ── View loader registry ─────────────────────────────────── */
 const VIEW_LOADERS = {
+  introduction: loadIntroduction,
   dashboard: loadDashboard,
   domains:   loadDomains,
   concepts:  loadConcepts,
@@ -112,6 +113,13 @@ function setEl(id, html) {
   if (el) el.innerHTML = html;
 }
 
+/* ── INTRODUCTION ───────────────────────────────────────────── */
+function loadIntroduction() {
+  // Static view — content is baked into HTML; just update breadcrumb
+  const breadcrumb = document.getElementById('breadcrumb-current');
+  if (breadcrumb) breadcrumb.textContent = 'Introduction';
+}
+
 /* ── DASHBOARD ─────────────────────────────────────────────── */
 async function loadDashboard() {
   try {
@@ -202,12 +210,10 @@ async function loadConceptDetail(id) {
       ${statusChip(c.status)}
     `);
 
-    // Body: prefer full body, fall back to summary
     const bodyHtml = c.body
       ? renderMarkdown(c.body)
       : `<p class="prose-p" style="color:var(--color-text-muted);font-style:italic">${c.summary ?? 'No content yet.'}</p>`;
 
-    // Glossary terms panel
     const glossaryHtml = (c.glossary_terms ?? []).length
       ? `<div class="prose-hr"></div>
          <h2 class="prose-h2">Related Terms</h2>
