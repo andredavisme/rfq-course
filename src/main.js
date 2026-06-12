@@ -25,6 +25,15 @@ document.addEventListener('DOMContentLoaded', () => {
     if (loader) loader();
   });
   router.init();
+
+  // Delegated handler for any element with data-route-to
+  // Covers domain cards, page header buttons, and any future nav triggers
+  document.addEventListener('click', (e) => {
+    const target = e.target.closest('[data-route-to]');
+    if (!target) return;
+    const routeKey = target.dataset.routeTo;
+    if (routeKey) router.navigate(routeKey);
+  });
 });
 
 /* ── Helpers ──────────────────────────────────────────────── */
